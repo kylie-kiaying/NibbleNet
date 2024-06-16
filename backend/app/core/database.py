@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from models.models import Base
+from ..models.models import Base
 
 DATABASE_URL = "postgresql+asyncpg://myuser:mypassword@localhost/nibblenet"
 
