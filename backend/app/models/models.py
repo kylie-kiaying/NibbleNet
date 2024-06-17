@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Text, Enum
+from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey, Text, Enum, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,7 +14,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    last_login = Column(TIMESTAMP)
+    is_active = Column(Boolean, default=True)
     profile_picture_url = Column(String, nullable=True)
 
 class ListingStatus(enum.Enum):
@@ -32,7 +32,7 @@ class FoodListing(Base):
     location = Column(String)
     status = Column(Enum(ListingStatus, name='listing_status'))
     created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(TIMESTAMP)
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     user = relationship("User", back_populates="listings")
 
 User.listings = relationship("FoodListing", order_by=FoodListing.id, back_populates="user")

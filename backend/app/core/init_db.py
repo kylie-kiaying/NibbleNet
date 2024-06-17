@@ -1,4 +1,4 @@
 import asyncio
-from core.database import init_db
+from .database import init_db
 
 asyncio.run(init_db())
