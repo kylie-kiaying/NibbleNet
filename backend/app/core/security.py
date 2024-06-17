@@ -5,10 +5,10 @@ from passlib.context import CryptContext
 from typing import Optional
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
-from jose import JWTError, jwt
-from ..core.database import get_db
-from ..services.user_service import get_user_by_email
-from ..models.models import User
+from jose import jwt
+from..core.database import get_db
+from..services.user_service import get_user_by_email
+from..models.models import User
 
 import os
 
@@ -46,22 +46,17 @@ def verify_token(token: str) -> str:
         raise credentials_exception
 
 async def get_current_user(db: AsyncSession = Depends(get_db), token: str = Depends(oauth2_scheme)) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"}
-    )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            raise credentials_exception
+            raise HTTPException(status_code=401, detail="Could not validate credentials")
         user = await get_user_by_email(db, username)
         if user is None:
-            raise credentials_exception
+            raise HTTPException(status_code=404, detail="User not found")
         return user
-    except JWTError:
-        raise credentials_exception
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 def get_current_active_user(current_user: User = Depends(get_current_user)):
     if not current_user.is_active:  
